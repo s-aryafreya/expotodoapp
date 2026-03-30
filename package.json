@@ -1,18 +1,27 @@
 {
   "name": "expotodoapp",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "expo-router/entry",
+  "homepage": "https://s-aryafreya.github.io/expotodoapp",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "predeploy": "npx expo export:web",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~6.1.2",
     "expo": "~54.0.33",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-web": "^0.21.0"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
 }
