@@ -13,35 +13,48 @@ export default function App() {
 
   const [input, setInput] = useState('');
 
+  // Function to add a new task to the list
   const addTask = () => {
     if (input.trim().length > 0) {
       const newTask = {
         key: Date.now().toString(),
         description: input,
         completed: false,
-        deadline: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toLowerCase(),
+        deadline: new Date().toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: '2-digit', 
+          year: 'numeric' 
+        }).toLowerCase(),
       };
       setTasks([...tasks, newTask]);
-      setInput('');
+      setInput(''); // Clear input after adding
     }
   };
 
+  // COMPLETE TASK FUNCTIONALITY: 
+  // This toggles the 'completed' boolean when the checkbox is clicked
   const toggleTask = (key) => {
-    setTasks(tasks.map(item => 
-      item.key === key ? { ...item, completed: !item.completed } : item
-    ));
+    setTasks(prevTasks => 
+      prevTasks.map(item => 
+        item.key === key ? { ...item, completed: !item.completed } : item
+      )
+    );
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.taskCard}>
       <CheckBox
         checked={item.completed}
-        onPress={() => toggleTask(item.key)}
+        onPress={() => toggleTask(item.key)} // Trigger toggle here
         checkedColor="#c5b3e3"
+        uncheckedColor="#ddd"
         containerStyle={{ padding: 0, margin: 0 }}
       />
       <View style={styles.taskTextContainer}>
-        <Text style={[styles.taskDescription, item.completed && styles.completedText]}>
+        <Text style={[
+          styles.taskDescription, 
+          item.completed && styles.completedText // Strikethrough logic
+        ]}>
           {item.description}
         </Text>
         <Text style={styles.dateText}>{item.deadline}</Text>
@@ -49,6 +62,7 @@ export default function App() {
     </View>
   );
 
+  // Dynamic stats calculation
   const activeCount = tasks.filter(t => !t.completed).length;
   const completedCount = tasks.filter(t => t.completed).length;
 
@@ -82,6 +96,7 @@ export default function App() {
             placeholder="Add a new task..."
             value={input}
             onChangeText={setInput}
+            onSubmitEditing={addTask} // Adds task when 'Enter' is pressed
             inputContainerStyle={{ borderBottomWidth: 0 }}
             containerStyle={{ height: 50 }}
           />
@@ -111,11 +126,11 @@ export default function App() {
 const styles = StyleSheet.create({
   outerContainer: { 
     flex: 1, 
-    backgroundColor: '#fdfbfb', // Soft off-white background
+    backgroundColor: '#fdfbfb', 
     alignItems: 'center' 
   },
   innerContainer: { 
-    width: width > 600 ? 500 : '90%', // Centered container for web/mobile
+    width: width > 600 ? 500 : '90%', 
     flex: 1,
     paddingTop: 40
   },
@@ -144,10 +159,6 @@ const styles = StyleSheet.create({
     width: '47%', 
     padding: 20, 
     borderRadius: 25, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
     elevation: 2
   },
   pinkBox: { backgroundColor: '#fff0f3' },
@@ -159,9 +170,6 @@ const styles = StyleSheet.create({
     borderRadius: 20, 
     padding: 15, 
     marginBottom: 25,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 15,
     elevation: 3
   },
   inputButtons: { 
@@ -180,9 +188,6 @@ const styles = StyleSheet.create({
     borderRadius: 22, 
     marginBottom: 12, 
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
     elevation: 1
   },
   taskTextContainer: { flex: 1, marginLeft: 10 },
