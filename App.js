@@ -1,23 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, SafeAreaView, Dimensions } from 'react-native';
-import { Text, Input, Button, CheckBox, Icon } from '@rneui/themed';
-import { Platform } from 'react-native';
-
-// Add this block below your imports
-if (Platform.OS === 'web') {
-  const iconFontStyles = `@font-face {
-    src: url(${require('react-native-vector-icons/Fonts/MaterialIcons.ttf')});
-    font-family: 'MaterialIcons';
-  }`;
-  const style = document.createElement('style');
-  style.type = 'text/css';
-  if (style.styleSheet) {
-    style.styleSheet.cssText = iconFontStyles;
-  } else {
-    style.appendChild(document.createTextNode(iconFontStyles));
-  }
-  document.head.appendChild(style);
-}
+import { StyleSheet, View, FlatList, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native';
+import { Text, Input, Button, Icon } from '@rneui/themed';
 
 const { width } = Dimensions.get('window');
 
@@ -30,7 +13,6 @@ export default function App() {
 
   const [input, setInput] = useState('');
 
-  // Function to add a new task to the list
   const addTask = () => {
     if (input.trim().length > 0) {
       const newTask = {
@@ -44,12 +26,10 @@ export default function App() {
         }).toLowerCase(),
       };
       setTasks([...tasks, newTask]);
-      setInput(''); // Clear input after adding
+      setInput('');
     }
   };
 
-  // COMPLETE TASK FUNCTIONALITY: 
-  // This toggles the 'completed' boolean when the checkbox is clicked
   const toggleTask = (key) => {
     setTasks(prevTasks => 
       prevTasks.map(item => 
@@ -60,17 +40,18 @@ export default function App() {
 
   const renderItem = ({ item }) => (
     <View style={styles.taskCard}>
-      <CheckBox
-        checked={item.completed}
-        onPress={() => toggleTask(item.key)} // Trigger toggle here
-        checkedColor="#c5b3e3"
-        uncheckedColor="#ddd"
-        containerStyle={{ padding: 0, margin: 0 }}
-      />
+      {/* CUSTOM CHECKBOX: Guaranteed to work on Web */}
+      <TouchableOpacity 
+        style={[styles.customCheck, item.completed && styles.customCheckActive]} 
+        onPress={() => toggleTask(item.key)}
+      >
+        {item.completed && <View style={styles.checkInner} />}
+      </TouchableOpacity>
+
       <View style={styles.taskTextContainer}>
         <Text style={[
           styles.taskDescription, 
-          item.completed && styles.completedText // Strikethrough logic
+          item.completed && styles.completedText 
         ]}>
           {item.description}
         </Text>
@@ -79,23 +60,22 @@ export default function App() {
     </View>
   );
 
-  // Dynamic stats calculation
   const activeCount = tasks.filter(t => !t.completed).length;
   const completedCount = tasks.filter(t => t.completed).length;
 
   return (
     <SafeAreaView style={styles.outerContainer}>
       <View style={styles.innerContainer}>
-        {/* Header */}
         <View style={styles.header}>
           <View>
             <Text h2 style={styles.titleText}>todo</Text>
             <Text style={styles.userSubtext}>Salem Freya</Text>
           </View>
-          <Icon name="account-circle" type="material" color="#757575" size={30} />
+          <View style={styles.avatarPlaceholder}>
+             <Text style={{color: '#fff', fontWeight: 'bold'}}>SF</Text>
+          </View>
         </View>
 
-        {/* Dashboard Stats */}
         <View style={styles.statsRow}>
           <View style={[styles.statBox, styles.pinkBox]}>
             <Text style={styles.statLabel}>Active</Text>
@@ -107,27 +87,25 @@ export default function App() {
           </View>
         </View>
 
-        {/* Input Area */}
         <View style={styles.inputArea}>
           <Input
             placeholder="Add a new task..."
             value={input}
             onChangeText={setInput}
-            onSubmitEditing={addTask} // Adds task when 'Enter' is pressed
+            onSubmitEditing={addTask}
             inputContainerStyle={{ borderBottomWidth: 0 }}
-            containerStyle={{ height: 50 }}
+            containerStyle={{ height: 45 }}
           />
           <View style={styles.inputButtons}>
             <Button 
               title="Add Task" 
               onPress={addTask} 
               buttonStyle={styles.addButton}
-              titleStyle={{ fontSize: 14, fontWeight: 'bold' }}
+              titleStyle={{ fontSize: 13, fontWeight: 'bold' }}
             />
           </View>
         </View>
 
-        {/* Task List */}
         <FlatList
           data={tasks}
           renderItem={renderItem}
@@ -141,78 +119,47 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  outerContainer: { 
-    flex: 1, 
-    backgroundColor: '#fdfbfb', 
-    alignItems: 'center' 
-  },
-  innerContainer: { 
-    width: width > 600 ? 500 : '90%', 
-    flex: 1,
-    paddingTop: 40
-  },
-  header: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: 30 
-  },
-  titleText: { 
-    color: '#ee9ca7', 
-    fontWeight: '900', 
-    letterSpacing: -1 
-  },
-  userSubtext: { 
-    color: '#a0a0a0', 
-    fontSize: 14, 
-    marginTop: -5 
-  },
-  statsRow: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    marginBottom: 30 
-  },
-  statBox: { 
-    width: '47%', 
-    padding: 20, 
-    borderRadius: 25, 
-    elevation: 2
-  },
+  outerContainer: { flex: 1, backgroundColor: '#fdfbfb', alignItems: 'center' },
+  innerContainer: { width: width > 600 ? 500 : '90%', flex: 1, paddingTop: 40 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 },
+  titleText: { color: '#ee9ca7', fontWeight: '900', letterSpacing: -1 },
+  userSubtext: { color: '#a0a0a0', fontSize: 14, marginTop: -5 },
+  avatarPlaceholder: { width: 35, height: 35, borderRadius: 18, backgroundColor: '#c5b3e3', justifyContent: 'center', alignItems: 'center' },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30 },
+  statBox: { width: '47%', padding: 20, borderRadius: 25, elevation: 2 },
   pinkBox: { backgroundColor: '#fff0f3' },
   purpleBox: { backgroundColor: '#f3f0ff' },
   statLabel: { color: '#888', fontSize: 13, fontWeight: '600' },
   statNumber: { fontSize: 32, fontWeight: 'bold', color: '#444' },
-  inputArea: { 
-    backgroundColor: '#fff', 
-    borderRadius: 20, 
-    padding: 15, 
-    marginBottom: 25,
-    elevation: 3
-  },
-  inputButtons: { 
-    alignItems: 'flex-end',
-    marginTop: 5 
-  },
-  addButton: { 
-    backgroundColor: '#c5b3e3', 
-    borderRadius: 15, 
-    paddingHorizontal: 20 
-  },
-  taskCard: { 
-    flexDirection: 'row', 
-    backgroundColor: '#fff', 
-    padding: 18, 
-    borderRadius: 22, 
-    marginBottom: 12, 
+  inputArea: { backgroundColor: '#fff', borderRadius: 20, padding: 15, marginBottom: 25, elevation: 3 },
+  inputButtons: { alignItems: 'flex-end', marginTop: 5 },
+  addButton: { backgroundColor: '#c5b3e3', borderRadius: 12, paddingHorizontal: 15 },
+  taskCard: { flexDirection: 'row', backgroundColor: '#fff', padding: 18, borderRadius: 22, marginBottom: 12, alignItems: 'center', elevation: 1 },
+  
+  // CUSTOM CHECKBOX STYLES
+  customCheck: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    justifyContent: 'center',
     alignItems: 'center',
-    elevation: 1
+    marginRight: 10
   },
+  customCheckActive: {
+    borderColor: '#c5b3e3',
+    backgroundColor: '#f3f0ff',
+  },
+  checkInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#c5b3e3',
+  },
+
   taskTextContainer: { flex: 1, marginLeft: 10 },
   taskDescription: { fontSize: 16, color: '#444', fontWeight: '500' },
-  completedText: { 
-    textDecorationLine: 'line-through', 
-    textDecorationStyle: 'solid', 
-    color: '#ccc' 
-  },
+  completedText: { textDecorationLine: 'line-through', color: '#ccc' },
   dateText: { fontSize: 11, color: '#bbb', marginTop: 2 }
 });
