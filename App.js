@@ -1,6 +1,23 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList, SafeAreaView, Dimensions } from 'react-native';
 import { Text, Input, Button, CheckBox, Icon } from '@rneui/themed';
+import { Platform } from 'react-native';
+
+// Add this block below your imports
+if (Platform.OS === 'web') {
+  const iconFontStyles = `@font-face {
+    src: url(${require('react-native-vector-icons/Fonts/MaterialIcons.ttf')});
+    font-family: 'MaterialIcons';
+  }`;
+  const style = document.createElement('style');
+  style.type = 'text/css';
+  if (style.styleSheet) {
+    style.styleSheet.cssText = iconFontStyles;
+  } else {
+    style.appendChild(document.createTextNode(iconFontStyles));
+  }
+  document.head.appendChild(style);
+}
 
 const { width } = Dimensions.get('window');
 
