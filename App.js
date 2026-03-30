@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, SafeAreaView } from 'react-native';
+import { StyleSheet, View, FlatList, SafeAreaView, Dimensions } from 'react-native';
 import { Text, Input, Button, CheckBox, Icon } from '@rneui/themed';
 
+const { width } = Dimensions.get('window');
+
 export default function App() {
-  // Part 3: Default tasks based on your mockup state
   const [tasks, setTasks] = useState([
     { key: '1', description: 'finish project', completed: false, deadline: 'mar 06, 2026' },
     { key: '2', description: 'do AR concept', completed: false, deadline: 'mar 06, 2026' },
@@ -11,9 +12,7 @@ export default function App() {
   ]);
 
   const [input, setInput] = useState('');
-  const [hideCompleted, setHideCompleted] = useState(false);
 
-  // Add Task Logic
   const addTask = () => {
     if (input.trim().length > 0) {
       const newTask = {
@@ -33,35 +32,19 @@ export default function App() {
     ));
   };
 
-  // Logic to determine "Overdue" status (Simple comparison for demo)
-  const isOverdue = (dateStr) => {
-    const taskDate = new Date(dateStr);
-    const today = new Date();
-    return taskDate < today.setHours(0,0,0,0);
-  };
-
-  // Part 2: renderItem function for FlatList
   const renderItem = ({ item }) => (
     <View style={styles.taskCard}>
       <CheckBox
         checked={item.completed}
         onPress={() => toggleTask(item.key)}
-        checkedColor="#a29bfe"
+        checkedColor="#c5b3e3"
         containerStyle={{ padding: 0, margin: 0 }}
       />
       <View style={styles.taskTextContainer}>
-        <Text style={[
-          styles.taskDescription,
-          item.completed && styles.completedText // Part 3: Strikethrough style
-        ]}>
+        <Text style={[styles.taskDescription, item.completed && styles.completedText]}>
           {item.description}
         </Text>
-        <View style={styles.dateRow}>
-          <Text style={styles.dateText}>{item.deadline}</Text>
-          {isOverdue(item.deadline) && !item.completed && (
-            <Text style={styles.overdueTag}>Overdue</Text>
-          )}
-        </View>
+        <Text style={styles.dateText}>{item.deadline}</Text>
       </View>
     </View>
   );
@@ -70,91 +53,144 @@ export default function App() {
   const completedCount = tasks.filter(t => t.completed).length;
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header section from mockup */}
-      <View style={styles.header}>
-        <View>
-          <Text h3 style={styles.titleText}>TaskFlow</Text>
-          <Text style={styles.userSubtext}>Salem Freya</Text>
+    <SafeAreaView style={styles.outerContainer}>
+      <View style={styles.innerContainer}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text h2 style={styles.titleText}>todo</Text>
+            <Text style={styles.userSubtext}>Salem Freya</Text>
+          </View>
+          <Icon name="account-circle" type="material" color="#757575" size={30} />
         </View>
-        <Icon name="logout" type="material" color="#757575" />
-      </View>
 
-      {/* Stats Dashboard */}
-      <View style={styles.statsRow}>
-        <View style={[styles.statBox, styles.pinkBox]}>
-          <Text style={styles.statLabel}>Active</Text>
-          <Text style={styles.statNumber}>{activeCount}</Text>
+        {/* Dashboard Stats */}
+        <View style={styles.statsRow}>
+          <View style={[styles.statBox, styles.pinkBox]}>
+            <Text style={styles.statLabel}>Active</Text>
+            <Text style={styles.statNumber}>{activeCount}</Text>
+          </View>
+          <View style={[styles.statBox, styles.purpleBox]}>
+            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={styles.statNumber}>{completedCount}</Text>
+          </View>
         </View>
-        <View style={[styles.statBox, styles.purpleBox]}>
-          <Text style={styles.statLabel}>Completed</Text>
-          <Text style={styles.statNumber}>{completedCount}</Text>
-        </View>
-      </View>
 
-      {/* Input Section */}
-      <View style={styles.inputArea}>
-        <Input
-          placeholder="What do you need to do?"
-          value={input}
-          onChangeText={setInput}
-          inputContainerStyle={{ borderBottomWidth: 0 }}
+        {/* Input Area */}
+        <View style={styles.inputArea}>
+          <Input
+            placeholder="Add a new task..."
+            value={input}
+            onChangeText={setInput}
+            inputContainerStyle={{ borderBottomWidth: 0 }}
+            containerStyle={{ height: 50 }}
+          />
+          <View style={styles.inputButtons}>
+            <Button 
+              title="Add Task" 
+              onPress={addTask} 
+              buttonStyle={styles.addButton}
+              titleStyle={{ fontSize: 14, fontWeight: 'bold' }}
+            />
+          </View>
+        </View>
+
+        {/* Task List */}
+        <FlatList
+          data={tasks}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.key}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
         />
-        <View style={styles.inputButtons}>
-          <Button 
-            title="Pick a Deadline" 
-            type="clear" 
-            titleStyle={{ color: '#757575', fontSize: 14 }}
-            icon={{ name: 'calendar-today', color: '#757575', size: 18 }}
-          />
-          <Button 
-            title="Add" 
-            onPress={addTask} 
-            buttonStyle={styles.addButton}
-          />
-        </View>
       </View>
-
-      {/* Visibility Toggle */}
-      <CheckBox
-        title="Hide completed tasks"
-        checked={hideCompleted}
-        onPress={() => setHideCompleted(!hideCompleted)}
-        containerStyle={styles.hideToggle}
-        textStyle={{ color: '#757575', fontWeight: 'normal' }}
-      />
-
-      {/* Part 2: FlatList Implementation */}
-      <FlatList
-        data={tasks.filter(t => hideCompleted ? !t.completed : true)}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9f9f7', paddingHorizontal: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, marginBottom: 20 },
-  titleText: { color: '#ee9ca7', fontWeight: 'bold' },
-  userSubtext: { color: '#757575', fontSize: 14 },
-  statsRow: { flexDirection: 'row', gap: 15, marginBottom: 25 },
-  statBox: { flex: 1, padding: 15, borderRadius: 20, elevation: 2 },
-  pinkBox: { backgroundColor: '#ffe4e8' },
-  purpleBox: { backgroundColor: '#f0ebff' },
-  statLabel: { color: '#757575', fontSize: 14 },
-  statNumber: { fontSize: 24, fontWeight: 'bold', color: '#333' },
-  inputArea: { backgroundColor: '#fff', borderRadius: 20, padding: 10, marginBottom: 10, elevation: 1 },
-  inputButtons: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  addButton: { backgroundColor: '#c5b3e3', borderRadius: 12, paddingHorizontal: 25 },
-  hideToggle: { backgroundColor: 'transparent', borderWidth: 0, padding: 0, marginBottom: 15 },
-  taskCard: { flexDirection: 'row', backgroundColor: '#fff', padding: 15, borderRadius: 20, marginBottom: 10, alignItems: 'center', elevation: 1 },
+  outerContainer: { 
+    flex: 1, 
+    backgroundColor: '#fdfbfb', // Soft off-white background
+    alignItems: 'center' 
+  },
+  innerContainer: { 
+    width: width > 600 ? 500 : '90%', // Centered container for web/mobile
+    flex: 1,
+    paddingTop: 40
+  },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 30 
+  },
+  titleText: { 
+    color: '#ee9ca7', 
+    fontWeight: '900', 
+    letterSpacing: -1 
+  },
+  userSubtext: { 
+    color: '#a0a0a0', 
+    fontSize: 14, 
+    marginTop: -5 
+  },
+  statsRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginBottom: 30 
+  },
+  statBox: { 
+    width: '47%', 
+    padding: 20, 
+    borderRadius: 25, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2
+  },
+  pinkBox: { backgroundColor: '#fff0f3' },
+  purpleBox: { backgroundColor: '#f3f0ff' },
+  statLabel: { color: '#888', fontSize: 13, fontWeight: '600' },
+  statNumber: { fontSize: 32, fontWeight: 'bold', color: '#444' },
+  inputArea: { 
+    backgroundColor: '#fff', 
+    borderRadius: 20, 
+    padding: 15, 
+    marginBottom: 25,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 3
+  },
+  inputButtons: { 
+    alignItems: 'flex-end',
+    marginTop: 5 
+  },
+  addButton: { 
+    backgroundColor: '#c5b3e3', 
+    borderRadius: 15, 
+    paddingHorizontal: 20 
+  },
+  taskCard: { 
+    flexDirection: 'row', 
+    backgroundColor: '#fff', 
+    padding: 18, 
+    borderRadius: 22, 
+    marginBottom: 12, 
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1
+  },
   taskTextContainer: { flex: 1, marginLeft: 10 },
-  taskDescription: { fontSize: 16, color: '#333' },
-  completedText: { textDecorationLine: 'line-through', textDecorationStyle: 'solid', color: '#aaa' },
-  dateRow: { flexDirection: 'row', alignItems: 'center' },
-  dateText: { fontSize: 12, color: '#757575' },
-  overdueTag: { color: '#ff4d4d', fontSize: 12, fontWeight: 'bold', marginLeft: 10 }
+  taskDescription: { fontSize: 16, color: '#444', fontWeight: '500' },
+  completedText: { 
+    textDecorationLine: 'line-through', 
+    textDecorationStyle: 'solid', 
+    color: '#ccc' 
+  },
+  dateText: { fontSize: 11, color: '#bbb', marginTop: 2 }
 });
